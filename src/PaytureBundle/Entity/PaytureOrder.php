@@ -4,6 +4,7 @@ namespace Necronru\PaytureBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Necronru\Payture\EWallet\Payment\Enum\SessionType;
+use Ramsey\Uuid\Uuid;
 
 /**
  * PaytureOrder
@@ -46,7 +47,7 @@ class PaytureOrder
     /**
      * @var PaytureUser
      *
-     * @ORM\ManyToOne(targetEntity="Necronru\PaytureBundle\Entity\PaytureUser", cascade={"PERSIST"})
+     * @ORM\ManyToOne(targetEntity="Necronru\PaytureBundle\Entity\PaytureUser", cascade={"persist", "remove"})
      */
     private $paytureUser;
 
@@ -60,9 +61,15 @@ class PaytureOrder
     /**
      * @var string SessionType::PAY|SessionType::BLOCK
      *
-     * @ORM\Column(name="session_id", type="string", length=255)
+     * @ORM\Column(name="session_type", type="string", length=255)
      */
     private $sessionType;
+
+    public function __construct()
+    {
+        $this->uuid = (string) Uuid::uuid5(Uuid::NAMESPACE_DNS, uniqid());
+    }
+
 
     /**
      * Get id
@@ -165,7 +172,7 @@ class PaytureOrder
     /**
      * @return string
      */
-    public function getSessionId(): string
+    public function getSessionId()
     {
         return $this->sessionId;
     }

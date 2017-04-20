@@ -20,6 +20,21 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('necronru_payture');
 
+        $rootNode->children()
+            ->scalarNode('api_host')
+                ->cannotBeEmpty()
+            ->end()
+
+            ->scalarNode('terminal_id')
+                ->cannotBeEmpty()
+            ->end()
+
+            ->scalarNode('terminal_password')
+                ->cannotBeEmpty()
+            ->end()
+
+        ;
+
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.

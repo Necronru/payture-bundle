@@ -1,8 +1,3 @@
-parameters:
-    payture_api: https://sandbox2.payture.com/
-    payture_id: 'Merchant'
-    payture_password: '123'
-
 services:
     payture.client:
         class: GuzzleHttp\Client
@@ -14,8 +9,8 @@ services:
         public: false
         arguments:
           - "@payture.client"
-          - "%payture_id%"
-          - "%payture_password%"
+          - "%payture_terminal_id%"
+          - "%payture_terminal_password%"
 
     payture.ewallet_service:
           class: Necronru\PaytureBundle\Service\EWalletService

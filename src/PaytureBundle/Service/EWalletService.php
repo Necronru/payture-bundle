@@ -32,6 +32,13 @@ class EWalletService
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @return EWallet
+     */
+    public function getEWallet(): EWallet
+    {
+        return $this->eWallet;
+    }
 
     public function createUser($login, $password, $phoneNumber = null): PaytureUser
     {
@@ -39,6 +46,8 @@ class EWalletService
             ->getRepository('NecronruPaytureBundle:PaytureUser')
             ->findOneBy(['login' => $login])
         ;
+
+
 
         if (!$user) {
             $user = new PaytureUser();
@@ -50,23 +59,20 @@ class EWalletService
         $this->entityManager->persist($user);
 
         try {
-            $this->eWallet
-                ->user()
-                ->check(new CheckCommand($user->getLogin(), $user->getPassword()));
+            $this->eWallet->user()->check(new CheckCommand($user->getLogin(), $user->getPassword()));
 
         } catch (EWalletError $ex) {
 
-            if (ErrorCode::USER_NOT_FOUND == $ex->getCode()) {
+            if (ErrorCode::$codes[ErrorCode::USER_NOT_FOUND] == $ex->getCode()) {
 
                 $this->eWallet->user()->register(new RegisterCommand(
                     $user->getLogin(),
                     $user->getPassword(),
                     $user->getPhoneNumber()
                 ));
+            } else {
+                throw $ex;
             }
-
-            throw $ex;
-
         }
 
         $this->entityManager->flush();
@@ -75,29 +81,29 @@ class EWalletService
         return $user;
     }
 
-    public function initSession(PaytureOrder $order, $templateTag = null, $ip = null, $cardId = null)
+    public function initSession(PaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null)
     {
-        if (!$ip) {
-            $ip = $_SERVER['REMOTE_ADDR'];
-        }
-
         if (!$order->getSessionId()) {
 
             $command = new InitCommand(
                 $order->getSessionType(),
+                $calbackUrl,
                 $ip,
                 $order->getPaytureUser()->getLogin(),
                 $order->getPaytureUser()->getPassword(),
-                $order->getId(),
+                $order->getUuid(),
                 $order->getAmount(),
                 $order->getPaytureUser()->getPhoneNumber(),
                 $cardId,
-                $templateTag
+                $templateTag,
+                'Test'
             );
 
             $response = $this->eWallet->payment()->init($command);
 
             $order->setSessionId($response->SessionId);
+            $this->entityManager->persist($order);
+            $this->entityManager->flush();
         }
 
         return $this->eWallet->payment()->getSessionLink($order->getSessionId());
@@ -110,6 +116,4 @@ class EWalletService
     {
         return $this->entityManager;
     }
-
-
 }

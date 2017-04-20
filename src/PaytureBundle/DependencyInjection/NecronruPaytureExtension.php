@@ -22,6 +22,10 @@ class NecronruPaytureExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('payture_api', $config['api_host']);
+        $container->setParameter('payture_terminal_id', $config['terminal_id']);
+        $container->setParameter('payture_terminal_password', $config['terminal_password']);
+
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
     }
