@@ -1,0 +1,21 @@
+{
+    "name": "necronru/payture-bundle",
+    "type": "library",
+    "autoload": {
+      "psr-4": {
+        "Necronru\\": "src/"
+      }
+    },
+    "require": {
+        "ramsey/uuid": "^3.6",
+        "necronru/payture": "~0.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Roman Toroshin",
+            "email": "necronru@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
