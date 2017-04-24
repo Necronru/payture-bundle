@@ -14,5 +14,5 @@ services:
 
     payture.ewallet_service:
           class: Necronru\PaytureBundle\Service\EWalletService
-          arguments: ["@payture.ewallet", "@doctrine.orm.entity_manager"]
+          arguments: ["@payture.ewallet", "@doctrine.orm.entity_manager", "@event_dispatcher"]
 
