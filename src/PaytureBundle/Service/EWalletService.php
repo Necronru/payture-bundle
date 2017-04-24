@@ -13,6 +13,8 @@ use Necronru\Payture\EWallet\User\Command\CheckCommand;
 use Necronru\Payture\EWallet\User\Command\RegisterCommand;
 use Necronru\PaytureBundle\Entity\PaytureOrder;
 use Necronru\PaytureBundle\Entity\PaytureUser;
+use Necronru\PaytureBundle\Event\PaytureNotificationEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EWalletService
 {
@@ -26,10 +28,16 @@ class EWalletService
      */
     private $entityManager;
 
-    public function __construct(EWallet $eWallet, EntityManagerInterface $entityManager)
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    public function __construct(EWallet $eWallet, EntityManagerInterface $entityManager, EventDispatcherInterface $dispatcher)
     {
         $this->eWallet = $eWallet;
         $this->entityManager = $entityManager;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -40,13 +48,19 @@ class EWalletService
         return $this->eWallet;
     }
 
+    /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
+    }
+
     public function createUser($login, $password, $phoneNumber = null): PaytureUser
     {
         $user = $this->getEntityManager()
             ->getRepository('NecronruPaytureBundle:PaytureUser')
-            ->findOneBy(['login' => $login])
-        ;
-
+            ->findOneBy(['login' => $login]);
 
 
         if (!$user) {
@@ -109,11 +123,14 @@ class EWalletService
         return $this->eWallet->payment()->getSessionLink($order->getSessionId());
     }
 
-    /**
-     * @return EntityManagerInterface
-     */
-    public function getEntityManager(): EntityManagerInterface
+    public function handleNotificationData($data)
     {
-        return $this->entityManager;
+        $notification = $this->eWallet
+            ->notification()
+            ->convert($data)
+        ;
+
+        $event = new PaytureNotificationEvent($notification, ['data' => $data]);
+        return $this->dispatcher->dispatch(get_class($notification), $event);
     }
 }

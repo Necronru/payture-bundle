@@ -3,6 +3,7 @@
 namespace Necronru\PaytureBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Necronru\Payture\Enum\TransactionStatus;
 use Necronru\Payture\EWallet\Payment\Enum\SessionType;
 use Ramsey\Uuid\Uuid;
 
@@ -42,7 +43,7 @@ class PaytureOrder
      *
      * @ORM\Column(name="status", type="string", length=255)
      */
-    private $status;
+    private $status = TransactionStatus::STATUS_NEW;
 
     /**
      * @var PaytureUser
@@ -64,6 +65,13 @@ class PaytureOrder
      * @ORM\Column(name="session_type", type="string", length=255)
      */
     private $sessionType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="last_notification", type="jsonb", nullable=true)
+     */
+    private $lastNotification;
 
     public function __construct()
     {
@@ -199,6 +207,22 @@ class PaytureOrder
     public function setSessionType($sessionType)
     {
         $this->sessionType = $sessionType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastNotification()
+    {
+        return $this->lastNotification;
+    }
+
+    /**
+     * @param string $lastNotification
+     */
+    public function setLastNotification(string $lastNotification)
+    {
+        $this->lastNotification = $lastNotification;
     }
 }
 

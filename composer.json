@@ -1,4 +1,5 @@
 {
+    "version": "0.0.2",
     "name": "necronru/payture-bundle",
     "type": "library",
     "autoload": {
@@ -8,7 +9,7 @@
     },
     "require": {
         "ramsey/uuid": "^3.6",
-        "necronru/payture": "dev-master"
+        "necronru/payture": "~0.0"
     },
     "license": "MIT",
     "authors": [
