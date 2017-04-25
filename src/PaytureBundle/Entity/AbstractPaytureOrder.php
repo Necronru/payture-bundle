@@ -88,7 +88,7 @@ abstract class AbstractPaytureOrder
      *
      * @param float $amount
      *
-     * @return PaytureOrder
+     * @return AbstractPaytureOrder
      */
     public function setAmount($amount)
     {
@@ -112,7 +112,7 @@ abstract class AbstractPaytureOrder
      *
      * @param string $uuid
      *
-     * @return PaytureOrder
+     * @return AbstractPaytureOrder
      */
     public function setUuid($uuid)
     {
@@ -136,7 +136,7 @@ abstract class AbstractPaytureOrder
      *
      * @param string $status
      *
-     * @return PaytureOrder
+     * @return AbstractPaytureOrder
      */
     public function setStatus($status)
     {

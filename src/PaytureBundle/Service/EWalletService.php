@@ -6,6 +6,7 @@ namespace Necronru\PaytureBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Necronru\Payture\Enum\ErrorCode;
+use Necronru\Payture\Enum\TransactionStatus;
 use Necronru\Payture\EWallet\EWallet;
 use Necronru\Payture\EWallet\EWalletError;
 use Necronru\Payture\EWallet\Payment\Command\InitCommand;
@@ -115,6 +116,8 @@ class EWalletService
             $response = $this->eWallet->payment()->init($command);
 
             $order->setSessionId($response->SessionId);
+            $order->setStatus(TransactionStatus::SESSION_INITED);
+
             $this->entityManager->persist($order);
             $this->entityManager->flush();
         }
