@@ -7,13 +7,7 @@ use Necronru\Payture\Enum\TransactionStatus;
 use Necronru\Payture\EWallet\Payment\Enum\SessionType;
 use Ramsey\Uuid\Uuid;
 
-/**
- * PaytureOrder
- *
- * @ORM\Table(name="payture_order")
- * @ORM\Entity(repositoryClass="Necronru\PaytureBundle\Repository\PaytureOrderRepository")
- */
-class PaytureOrder
+abstract class AbstractPaytureOrder
 {
     /**
      * @var int
@@ -22,56 +16,56 @@ class PaytureOrder
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="amount", type="float")
+     * @ORM\Column(name="amount", type="float", options={"default"=0})
      */
-    private $amount;
+    protected $amount = 0;
 
     /**
      * @var string
      *
      * @ORM\Column(name="uuid", type="string", length=255, unique=true)
      */
-    private $uuid;
+    protected $uuid;
 
     /**
      * @var string
      *
      * @ORM\Column(name="status", type="string", length=255)
      */
-    private $status = TransactionStatus::STATUS_NEW;
+    protected $status = TransactionStatus::STATUS_NEW;
 
     /**
      * @var PaytureUser
      *
-     * @ORM\ManyToOne(targetEntity="Necronru\PaytureBundle\Entity\PaytureUser", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity="Necronru\PaytureBundle\Entity\PaytureUser", cascade={"persist"})
      */
-    private $paytureUser;
+    protected $paytureUser;
 
     /**
      * @var string
      *
      * @ORM\Column(name="session_id", type="string", length=255, nullable=true)
      */
-    private $sessionId;
+    protected $sessionId;
 
     /**
      * @var string SessionType::PAY|SessionType::BLOCK
      *
      * @ORM\Column(name="session_type", type="string", length=255)
      */
-    private $sessionType;
+    protected $sessionType;
 
     /**
      * @var string
      *
      * @ORM\Column(name="last_notification", type="jsonb", nullable=true)
      */
-    private $lastNotification;
+    protected $lastNotification;
 
     public function __construct()
     {

@@ -11,7 +11,7 @@ use Necronru\Payture\EWallet\EWalletError;
 use Necronru\Payture\EWallet\Payment\Command\InitCommand;
 use Necronru\Payture\EWallet\User\Command\CheckCommand;
 use Necronru\Payture\EWallet\User\Command\RegisterCommand;
-use Necronru\PaytureBundle\Entity\PaytureOrder;
+use Necronru\PaytureBundle\Entity\AbstractPaytureOrder;
 use Necronru\PaytureBundle\Entity\PaytureUser;
 use Necronru\PaytureBundle\Event\PaytureNotificationEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -95,7 +95,7 @@ class EWalletService
         return $user;
     }
 
-    public function initSession(PaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null)
+    public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null)
     {
         if (!$order->getSessionId()) {
 
@@ -109,8 +109,7 @@ class EWalletService
                 $order->getAmount(),
                 $order->getPaytureUser()->getPhoneNumber(),
                 $cardId,
-                $templateTag,
-                'Test'
+                $templateTag
             );
 
             $response = $this->eWallet->payment()->init($command);

@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * PaytureUser
  *
  * @ORM\Table(name="payture_user")
- * @ORM\Entity(repositoryClass="Necronru\PaytureBundle\Repository\PaytureUserRepository")
+ * @ORM\Entity
  */
 class PaytureUser
 {
@@ -39,21 +39,9 @@ class PaytureUser
     /**
      * @var integer
      *
-     * @ORM\Column(name="phone_number", type="integer", length=255, nullable=true)
+     * @ORM\Column(name="phone_number", type="string", length=255, nullable=true)
      */
     private $phoneNumber;
-
-    /**
-     * @var PaytureOrder[]|ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="Necronru\PaytureBundle\Entity\PaytureOrder", mappedBy="id")
-     */
-    private $orders;
-
-    public function __construct()
-    {
-        $this->orders = new ArrayCollection();
-    }
 
     /**
      * Get id
