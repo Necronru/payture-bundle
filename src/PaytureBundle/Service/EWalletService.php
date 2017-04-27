@@ -85,6 +85,7 @@ class EWalletService
                     $user->getPassword(),
                     $user->getPhoneNumber()
                 ));
+
             } else {
                 throw $ex;
             }
@@ -107,7 +108,7 @@ class EWalletService
                 $order->getPaytureUser()->getLogin(),
                 $order->getPaytureUser()->getPassword(),
                 $order->getUuid(),
-                $order->getAmount(),
+                $order->getAmount() * 100, // Сумма платежа в копейках
                 $order->getPaytureUser()->getPhoneNumber(),
                 $cardId,
                 $templateTag
