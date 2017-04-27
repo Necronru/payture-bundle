@@ -97,7 +97,7 @@ class EWalletService
         return $user;
     }
 
-    public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null)
+    public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null, $productName = null)
     {
         if (!$order->getSessionId()) {
 
@@ -111,7 +111,10 @@ class EWalletService
                 $order->getAmount() * 100, // Сумма платежа в копейках
                 $order->getPaytureUser()->getPhoneNumber(),
                 $cardId,
-                $templateTag
+                $templateTag,
+                null,
+                $order->getAmount(),
+                $productName
             );
 
             $response = $this->eWallet->payment()->init($command);
