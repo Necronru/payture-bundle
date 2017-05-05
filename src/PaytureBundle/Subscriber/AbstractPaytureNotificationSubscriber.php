@@ -5,6 +5,7 @@ namespace Necronru\PaytureBundle\Subscriber;
 
 
 use Necronru\PaytureBundle\Event\PaytureNotificationEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class AbstractPaytureNotificationSubscriber implements EventSubscriberInterface
@@ -22,17 +23,17 @@ abstract class AbstractPaytureNotificationSubscriber implements EventSubscriberI
         ];
     }
 
-    abstract public function onCustomerAddFail(PaytureNotificationEvent $event);
+    abstract public function onCustomerAddFail(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerAddSuccess(PaytureNotificationEvent $event);
+    abstract public function onCustomerAddSuccess(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerPayFail(PaytureNotificationEvent $event);
+    abstract public function onCustomerPayFail(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerPaySuccess(PaytureNotificationEvent $event);
+    abstract public function onCustomerPaySuccess(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerRefundSuccess(PaytureNotificationEvent $event);
+    abstract public function onCustomerRefundSuccess(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerRefundFail(PaytureNotificationEvent $event);
+    abstract public function onCustomerRefundFail(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 
-    abstract public function onCustomerSendCode(PaytureNotificationEvent $event);
+    abstract public function onCustomerSendCode(PaytureNotificationEvent $event, $eventName, EventDispatcherInterface $dispatcher);
 }
