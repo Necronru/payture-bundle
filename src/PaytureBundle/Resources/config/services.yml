@@ -1,18 +1,1 @@
 services:
-    payture.client:
-        class: GuzzleHttp\Client
-        arguments:
-          - { base_uri: "%payture_api%" }
-
-    payture.ewallet:
-        class: Necronru\Payture\EWallet\EWallet
-        public: false
-        arguments:
-          - "@payture.client"
-          - "%payture_terminal_id%"
-          - "%payture_terminal_password%"
-
-    payture.ewallet_service:
-          class: Necronru\PaytureBundle\Service\EWalletService
-          arguments: ["@payture.ewallet", "@doctrine.orm.entity_manager", "@event_dispatcher"]
-

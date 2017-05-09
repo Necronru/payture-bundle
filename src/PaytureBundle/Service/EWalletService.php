@@ -15,6 +15,7 @@ use Necronru\Payture\EWallet\User\Command\RegisterCommand;
 use Necronru\PaytureBundle\Entity\AbstractPaytureOrder;
 use Necronru\PaytureBundle\Entity\PaytureUser;
 use Necronru\PaytureBundle\Event\PaytureNotificationEvent;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EWalletService
@@ -34,11 +35,21 @@ class EWalletService
      */
     private $dispatcher;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(EWallet $eWallet, EntityManagerInterface $entityManager, EventDispatcherInterface $dispatcher)
     {
         $this->eWallet = $eWallet;
         $this->entityManager = $entityManager;
         $this->dispatcher = $dispatcher;
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -59,6 +70,8 @@ class EWalletService
 
     public function createUser($login, $password, $phoneNumber = null): PaytureUser
     {
+        $uniqId = uniqid('payture_create_user.');
+
         $user = $this->getEntityManager()
             ->getRepository('NecronruPaytureBundle:PaytureUser')
             ->findOneBy(['login' => $login]);
@@ -74,19 +87,37 @@ class EWalletService
         $this->entityManager->persist($user);
 
         try {
-            $this->eWallet->user()->check(new CheckCommand($user->getLogin(), $user->getPassword()));
+
+            $command = new CheckCommand($user->getLogin(), $user->getPassword());
+
+            $this->log('try find payture user', [
+                'uniqid' => $uniqId,
+                'command' => json_encode($command),
+                'commandClass' => get_class($command)
+            ]);
+
+            $this->eWallet->user()->check($command);
 
         } catch (EWalletError $ex) {
 
             if (ErrorCode::$codes[ErrorCode::USER_NOT_FOUND] == $ex->getCode()) {
 
-                $this->eWallet->user()->register(new RegisterCommand(
+                $command = new RegisterCommand(
                     $user->getLogin(),
                     $user->getPassword(),
                     $user->getPhoneNumber()
-                ));
+                );
+
+                $this->log('try to register payture user', [
+                    'uniqid' => $uniqId,
+                    'command' => json_encode($command),
+                    'commandClass' => get_class($command)
+                ]);
+
+                $this->eWallet->user()->register($command);
 
             } else {
+                $this->log('failed register user', ['uniqid' => $uniqId, 'mesasge' => $ex->getMessage()], 'critical');
                 throw $ex;
             }
         }
@@ -99,6 +130,8 @@ class EWalletService
 
     public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null, $productName = null)
     {
+        $uniqId = uniqid('payture_init_session.');
+
         if (!$order->getSessionId()) {
 
             $command = new InitCommand(
@@ -117,7 +150,19 @@ class EWalletService
                 $productName
             );
 
-            $response = $this->eWallet->payment()->init($command);
+            $this->log('try init session', [
+                'orderId' => $order->getId(),
+                'uniqid' => $uniqId,
+                'command' => json_encode($command),
+                'commandClass' => get_class($command)
+            ], 'debug');
+
+            try {
+                $response = $this->eWallet->payment()->init($command);
+            } catch (EWalletError $ex) {
+                $this->log('failed init session', ['uniqid' => $uniqId, 'message' => $ex->getMessage()], 'critical');
+                throw $ex;
+            }
 
             $order->setSessionId($response->SessionId);
             $order->setStatus(TransactionStatus::SESSION_INITED);
@@ -133,10 +178,18 @@ class EWalletService
     {
         $notification = $this->eWallet
             ->notification()
-            ->convert($data)
-        ;
+            ->convert($data);
 
         $event = new PaytureNotificationEvent($notification, ['data' => $data]);
         return $this->dispatcher->dispatch(get_class($notification), $event);
+    }
+
+    protected function log($message, $context = [], $level = 'debug') {
+
+        if (!$this->logger) {
+            return;
+        }
+
+        $this->logger->log($level, $message, $context);
     }
 }
