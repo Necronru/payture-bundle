@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Necronru\Payture\Enum\ErrorCode;
 use Necronru\Payture\Enum\TransactionStatus;
 use Necronru\Payture\EWallet\Card\Command\GetCardListCommand;
+use Necronru\Payture\EWallet\Card\Command\RemoveCardCommand;
 use Necronru\Payture\EWallet\Card\Response\GetCardList\Item as PaytureCard;
 use Necronru\Payture\EWallet\EWallet;
 use Necronru\Payture\EWallet\EWalletError;
@@ -80,7 +81,7 @@ class EWalletService
      */
     public function fetchCardList(PaytureUser $user)
     {
-        $response =  $this->getEWallet()->card()->getList(new GetCardListCommand($user->getLogin(), $user->getPassword()));
+        $response = $this->getEWallet()->card()->getList(new GetCardListCommand($user->getLogin(), $user->getPassword()));
 
         return $cards = array_map(function ($card) {
             /** @var PaytureCard $card */
@@ -93,6 +94,7 @@ class EWalletService
                 'no_cvv' => 'true' == $card->NoCVV ? true : false,
                 'expired' => 'true' == $card->Expired ? true : false
             ];
+
         }, (array)$response->Item);
     }
 
@@ -247,6 +249,13 @@ class EWalletService
 
         $response = $this->getEWallet()->payment()->init($command);
 
-        return $this->getEWallet()->payment()->getSessionLink($response->SessionId);
+        return $this->getEWallet()->card()->getSessionLink($response->SessionId);
+    }
+
+    public function removeCard($cardId, PaytureUser $user)
+    {
+        $command = new RemoveCardCommand($cardId, $user->getLogin(), $user->getPassword());
+
+        return $this->getEWallet()->card()->remove($command);
     }
 }
