@@ -18,6 +18,7 @@ class PaytureUserCheckCommand extends ContainerAwareCommand
             ->setName('payture:user:check')
             ->addArgument('login', InputArgument::REQUIRED)
             ->addArgument('password', InputArgument::REQUIRED)
+            ->addArgument('phone', InputArgument::OPTIONAL)
         ;
     }
 

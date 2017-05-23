@@ -4,12 +4,16 @@
 namespace Necronru\PaytureBundle\Service;
 
 
+use Ahml\BillingBundle\Builder\CardAddSessionBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Necronru\Payture\Enum\ErrorCode;
 use Necronru\Payture\Enum\TransactionStatus;
+use Necronru\Payture\EWallet\Card\Command\GetCardListCommand;
+use Necronru\Payture\EWallet\Card\Response\GetCardList\Item as PaytureCard;
 use Necronru\Payture\EWallet\EWallet;
 use Necronru\Payture\EWallet\EWalletError;
 use Necronru\Payture\EWallet\Payment\Command\InitCommand;
+use Necronru\Payture\EWallet\Payment\Enum\SessionType;
 use Necronru\Payture\EWallet\User\Command\CheckCommand;
 use Necronru\Payture\EWallet\User\Command\RegisterCommand;
 use Necronru\PaytureBundle\Entity\AbstractPaytureOrder;
@@ -55,7 +59,7 @@ class EWalletService
     /**
      * @return EWallet
      */
-    public function getEWallet(): EWallet
+    public function getEWallet()
     {
         return $this->eWallet;
     }
@@ -63,12 +67,45 @@ class EWalletService
     /**
      * @return EntityManagerInterface
      */
-    public function getEntityManager(): EntityManagerInterface
+    public function getEntityManager()
     {
         return $this->entityManager;
     }
 
-    public function createUser($login, $password, $phoneNumber = null): PaytureUser
+    /**
+     * Получить список карт пользователя
+     *
+     * @param PaytureUser $user
+     * @return mixed|\Necronru\Payture\EWallet\Card\Response\GetCardList\GetList
+     */
+    public function fetchCardList(PaytureUser $user)
+    {
+        $response =  $this->getEWallet()->card()->getList(new GetCardListCommand($user->getLogin(), $user->getPassword()));
+
+        return $cards = array_map(function ($card) {
+            /** @var PaytureCard $card */
+
+            return [
+                'card_id' => $card->CardId,
+                'card_name' => $card->CardName,
+                'card_holder' => $card->CardHolder,
+                'status' => $card->Status,
+                'no_cvv' => 'true' == $card->NoCVV ? true : false,
+                'expired' => 'true' == $card->Expired ? true : false
+            ];
+        }, (array)$response->Item);
+    }
+
+    /**
+     * Создать и зарегестрировать пользователя
+     *
+     * @param $login
+     * @param $password
+     * @param null $phoneNumber
+     * @return PaytureUser|null|object
+     * @throws EWalletError
+     */
+    public function createUser($login, $password, $phoneNumber = null)
     {
         $uniqId = uniqid('payture_create_user.');
 
@@ -191,5 +228,25 @@ class EWalletService
         }
 
         $this->logger->log($level, $message, $context);
+    }
+
+    public function initAddSession(PaytureUser $user, $callbackUrl, $ip, $templateTag = null)
+    {
+        $command = new InitCommand(
+            SessionType::ADD,
+            $callbackUrl,
+            $ip,
+            $user->getLogin(),
+            $user->getPassword(),
+            null,
+            null,
+            null,
+            null,
+            $templateTag
+        );
+
+        $response = $this->getEWallet()->payment()->init($command);
+
+        return $this->getEWallet()->payment()->getSessionLink($response->SessionId);
     }
 }
