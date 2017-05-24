@@ -87,11 +87,11 @@ class EWalletService
             /** @var PaytureCard $card */
 
             return [
-                'card_id' => $card->CardId,
-                'card_name' => $card->CardName,
-                'card_holder' => $card->CardHolder,
+                'cardId' => $card->CardId,
+                'cardName' => $card->CardName,
+                'cardHolder' => $card->CardHolder,
                 'status' => $card->Status,
-                'no_cvv' => 'true' == $card->NoCVV ? true : false,
+                'noCvv' => 'true' == $card->NoCVV ? true : false,
                 'expired' => 'true' == $card->Expired ? true : false
             ];
 
