@@ -167,7 +167,7 @@ class EWalletService
         return $user;
     }
 
-    public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null, $productName = null)
+    public function initSession(AbstractPaytureOrder $order, $calbackUrl, $ip, $templateTag = null, $cardId = null, $productName = null, $locale = null)
     {
         $uniqId = uniqid('payture_init_session.');
 
@@ -184,7 +184,7 @@ class EWalletService
                 $order->getPaytureUser()->getPhoneNumber(),
                 $cardId,
                 $templateTag,
-                null,
+                $locale,
                 $order->getAmount(),
                 $productName
             );
