@@ -232,7 +232,7 @@ class EWalletService
         $this->logger->log($level, $message, $context);
     }
 
-    public function initAddSession(PaytureUser $user, $callbackUrl, $ip, $templateTag = null)
+    public function initAddSession(PaytureUser $user, $callbackUrl, $ip, $templateTag = null, $locale = null)
     {
         $command = new InitCommand(
             SessionType::ADD,
@@ -244,7 +244,8 @@ class EWalletService
             null,
             null,
             null,
-            $templateTag
+            $templateTag,
+            $locale
         );
 
         $response = $this->getEWallet()->payment()->init($command);
